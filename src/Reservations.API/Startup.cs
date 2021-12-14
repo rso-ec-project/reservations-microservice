@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Reservations.Application.Reservations;
 using Reservations.Application.Statuses;
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
@@ -39,6 +40,7 @@ namespace Reservations.API
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IReservationService, ReservationService>();
             services.AddScoped<IStatusService, StatusService>();
 
             services.AddScoped<IReservationRepository, ReservationRepository>();
@@ -65,6 +67,7 @@ namespace Reservations.API
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
+                mc.AddProfile(new ReservationMapperProfile());
                 mc.AddProfile(new StatusMapperProfile());
             });
 

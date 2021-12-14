@@ -35,14 +35,16 @@ namespace Reservations.Infrastructure.Repositories
             return await Set().FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
 
-        public virtual void Add(TEntity entity)
+        public virtual async Task<TEntity> AddAsync(TEntity entity)
         {
-            Context.Set<TEntity>().Add(entity);
+            var addedEntity = await Context.Set<TEntity>().AddAsync(entity);
+            return addedEntity.Entity;
         }
 
-        public virtual void Update(TEntity entity)
+        public virtual TEntity Update(TEntity entity)
         {
-            Context.Set<TEntity>().Update(entity);
+            var updatedEntity = Context.Set<TEntity>().Update(entity);
+            return updatedEntity.Entity;
         }
 
         public virtual void Remove(TPrimaryKey id)
