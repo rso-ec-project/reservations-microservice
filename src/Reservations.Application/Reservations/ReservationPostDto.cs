@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Reservations.Application.Reservations
 {
-    class ReservationPostDto
+    public class ReservationPostDto
     {
+        public DateTime From { get; set; }
+        public DateTime To { get; set; }
+        public string Code { get; set; }
+        public int UserId { get; set; }
+        public int ChargerId { get; set; }
+        public int StatusId { get; set; }
     }
 }

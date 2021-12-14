@@ -10,9 +10,9 @@ namespace Reservations.Domain.Shared
 
         Task<TEntity> GetAsync(TPrimaryKey id);
 
-        void Add(TEntity entity);
+        Task<TEntity> AddAsync(TEntity entity);
 
-        void Update(TEntity entity);
+        TEntity Update(TEntity entity);
 
         void Remove(TPrimaryKey id);
 

@@ -28,5 +28,13 @@ namespace Reservations.Application.Reservations
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(statusId);
             return _mapper.Map<Reservation, ReservationDto>(reservation);
         }
+
+        public async Task<ReservationDto> PostAsync(ReservationPostDto reservationPostDto)
+        {
+            var reservation = _mapper.Map<ReservationPostDto, Reservation>(reservationPostDto);
+            var addedReservation = await _unitOfWork.ReservationRepository.AddAsync(reservation);
+            await _unitOfWork.CommitAsync();
+            return _mapper.Map<Reservation, ReservationDto>(addedReservation);
+        }
     }
 }
