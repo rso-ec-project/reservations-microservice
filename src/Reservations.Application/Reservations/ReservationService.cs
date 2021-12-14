@@ -23,9 +23,9 @@ namespace Reservations.Application.Reservations
             return _mapper.Map<List<Reservation>, List<ReservationDto>>(reservations);
         }
 
-        public async Task<ReservationDto> GetAsync(int statusId)
+        public async Task<ReservationDto> GetAsync(int reservationId)
         {
-            var reservation = await _unitOfWork.ReservationRepository.GetAsync(statusId);
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(reservationId);
             return _mapper.Map<Reservation, ReservationDto>(reservation);
         }
 
@@ -35,6 +35,18 @@ namespace Reservations.Application.Reservations
             var addedReservation = await _unitOfWork.ReservationRepository.AddAsync(reservation);
             await _unitOfWork.CommitAsync();
             return _mapper.Map<Reservation, ReservationDto>(addedReservation);
+        }
+
+        public async Task<bool> DeleteAsync(int reservationId)
+        {
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(reservationId);
+
+            if (reservation == null)
+                return false;
+
+            _unitOfWork.ReservationRepository.Remove(reservationId);
+            await _unitOfWork.CommitAsync();
+            return true;
         }
     }
 }

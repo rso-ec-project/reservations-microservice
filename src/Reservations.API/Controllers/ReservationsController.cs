@@ -46,5 +46,17 @@ namespace Reservations.API.Controllers
         {
             return await _reservationService.PostAsync(reservationPostDto);
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Delete(int id)
+        {
+             var isDeleted = await _reservationService.DeleteAsync(id);
+
+             if (!isDeleted)
+                 return NotFound();
+             return Ok();
+        }
     }
 }

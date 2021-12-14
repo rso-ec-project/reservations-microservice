@@ -8,5 +8,6 @@ namespace Reservations.Application.Reservations
         Task<List<ReservationDto>> GetAsync();
         Task<ReservationDto> GetAsync(int statusId);
         Task<ReservationDto> PostAsync(ReservationPostDto reservationPostDto);
+        Task<bool> DeleteAsync(int reservationId);
     }
 }
