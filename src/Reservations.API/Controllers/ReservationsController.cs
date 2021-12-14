@@ -47,6 +47,19 @@ namespace Reservations.API.Controllers
             return await _reservationService.PostAsync(reservationPostDto);
         }
 
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ReservationDto>> Put(int id, [FromBody] ReservationPutDto reservationPutDto)
+        {
+            var reservation = await _reservationService.PutAsync(id, reservationPutDto);
+
+            if (reservation == null)
+                return NotFound();
+
+            return reservation;
+        }
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

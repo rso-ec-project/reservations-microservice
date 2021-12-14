@@ -37,6 +37,22 @@ namespace Reservations.Application.Reservations
             return _mapper.Map<Reservation, ReservationDto>(addedReservation);
         }
 
+        public async Task<ReservationDto> PutAsync(int reservationId, ReservationPutDto reservationPutDto)
+        {
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(reservationId);
+
+            if (reservation == null)
+                return null;
+
+            reservation.From = reservationPutDto.From;
+            reservation.To = reservationPutDto.To;
+            reservation.StatusId = reservationPutDto.StatusId;
+
+            var updatedReservation = _unitOfWork.ReservationRepository.Update(reservation);
+            await _unitOfWork.CommitAsync();
+            return _mapper.Map<Reservation, ReservationDto>(updatedReservation);
+        }
+
         public async Task<bool> DeleteAsync(int reservationId)
         {
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(reservationId);
