@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Reservations.Application.Statuses;
+using Reservations.Application.Reservations;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,35 +8,35 @@ namespace Reservations.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StatusesController : ControllerBase
+    public class ReservationsController : ControllerBase
     {
-        private readonly IStatusService _statusService;
+        private readonly IReservationService _reservationService;
 
-        public StatusesController(IStatusService statusService)
+        public ReservationsController(IReservationService reservationService)
         {
-            _statusService = statusService;
+            _reservationService = reservationService;
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<List<StatusDto>>> Get()
+        public async Task<ActionResult<List<ReservationDto>>> Get()
         {
-            return await _statusService.GetAsync();
+            return await _reservationService.GetAsync();
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<StatusDto>> Get(int id)
+        public async Task<ActionResult<ReservationDto>> Get(int id)
         {
-            var status = await _statusService.GetAsync(id);
+            var reservation = await _reservationService.GetAsync(id);
 
-            if (status == null)
+            if (reservation == null)
                 return NotFound();
 
-            return status;
+            return reservation;
         }
     }
 }
