@@ -5,7 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Reservations.Domain.ReservationAggregate;
+using Reservations.Domain.Shared;
+using Reservations.Domain.StatusAggregate;
 using Reservations.Infrastructure;
+using Reservations.Infrastructure.Repositories;
 using System;
 
 namespace Reservations.API
@@ -26,6 +30,11 @@ namespace Reservations.API
             {
                 options.UseNpgsql(GetConnectionString());
             });
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IReservationRepository, ReservationRepository>();
+            services.AddScoped<IStatusRepository, StatusRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
