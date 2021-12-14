@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Reservations.Application.Statuses;
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
 using Reservations.Domain.StatusAggregate;
@@ -31,7 +33,13 @@ namespace Reservations.API
                 options.UseNpgsql(GetConnectionString());
             });
 
+            var mapperConfig = CreateMapperConfiguration();
+            var mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IStatusService, StatusService>();
 
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IStatusRepository, StatusRepository>();
@@ -51,6 +59,16 @@ namespace Reservations.API
             var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
             return $"Host={host};Database={database};Username={username};Password={password}";
+        }
+
+        private static MapperConfiguration CreateMapperConfiguration()
+        {
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new StatusMapperProfile());
+            });
+
+            return mapperConfig;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
