@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace Reservations.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
+    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [Produces("application/json")]
     public class ReservationsController : ControllerBase
     {
         private readonly IReservationService _reservationService;
