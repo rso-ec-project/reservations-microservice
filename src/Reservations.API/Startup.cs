@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Reservations.API.Extensions;
 using Reservations.Application.Reservations;
+using Reservations.Application.ReservationSlots;
 using Reservations.Application.Statuses;
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
@@ -42,11 +43,13 @@ namespace Reservations.API
 
             services.AddScoped<IReservationService, ReservationService>();
             services.AddScoped<IStatusService, StatusService>();
+            services.AddScoped<IReservationSlotService, ReservationSlotService>();
 
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IStatusRepository, StatusRepository>();
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = null; });
 
             services.AddSwagger();
 
