@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Reservations.Application.ChargingStationsMicroService.Chargers;
+using System;
 
 namespace Reservations.Application.Reservations
 {
@@ -11,5 +12,6 @@ namespace Reservations.Application.Reservations
         public int UserId { get; set; }
         public int ChargerId { get; set; }
         public int StatusId { get; set; }
+        public ChargerDto Charger { get; set; }
     }
 }

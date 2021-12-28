@@ -1,12 +1,15 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
+using Reservations.API.Extensions;
+using Reservations.Application.ChargingStationsMicroService.Chargers;
 using Reservations.Application.Reservations;
+using Reservations.Application.ReservationSlots;
+using Reservations.Application.Shared;
 using Reservations.Application.Statuses;
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
@@ -14,6 +17,7 @@ using Reservations.Domain.StatusAggregate;
 using Reservations.Infrastructure;
 using Reservations.Infrastructure.Repositories;
 using System;
+using System.Net.Http;
 
 namespace Reservations.API
 {
@@ -29,7 +33,7 @@ namespace Reservations.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>((sp, options) =>
+            services.AddDbContext<ApplicationDbContext>((_, options) =>
             {
                 options.UseNpgsql(GetConnectionString());
             });
@@ -42,18 +46,52 @@ namespace Reservations.API
 
             services.AddScoped<IReservationService, ReservationService>();
             services.AddScoped<IStatusService, StatusService>();
+            services.AddScoped<IReservationSlotService, ReservationSlotService>();
+            
+            services.AddScoped<IChargerService, ChargerService>();
 
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IStatusRepository, StatusRepository>();
 
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
+            services.AddHttpClient<ChargingStationsMicroServiceClient>((_, client) =>
+                {
+                    SetHttpClientBaseAddress(client, new Uri(Configuration["ApplicationSettings:ChargingStationsMSAddress"]));
+                    SetHttpClientRequestHeader(client, "ReservationsMS");
+                })
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                    new HttpClientHandler()
+                    {
+                        ServerCertificateCustomValidationCallback =
+                            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                    }
+                );
+
+            services.AddControllers()
+                .AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = null; });
+
+            services.AddSwagger();
+
+            services.AddApiVersioning(config =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Reservations.API", Version = "v1" });
+                config.DefaultApiVersion = new ApiVersion(1, 0);
+                config.AssumeDefaultVersionWhenUnspecified = true;
+                config.ReportApiVersions = true;
             });
         }
 
-        private string GetConnectionString()
+        private static void SetHttpClientRequestHeader(HttpClient client, string userAgent)
+        {
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
+            client.DefaultRequestVersion = new Version(1, 0);
+        }
+
+        private static void SetHttpClientBaseAddress(HttpClient client, Uri baseAddress)
+        {
+            client.BaseAddress = baseAddress;
+        }
+
+        private static string GetConnectionString()
         {
             var host = Environment.GetEnvironmentVariable("DB_HOST");
             var database = Environment.GetEnvironmentVariable("DB_NAME");
@@ -77,12 +115,8 @@ namespace Reservations.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reservations.API v1"));
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ChargingStations.API v1"));
 
             app.UseHttpsRedirection();
 
