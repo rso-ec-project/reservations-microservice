@@ -60,7 +60,7 @@ namespace Reservations.Application.ReservationSlots
                 });
             }
 
-            return reservationSlots;
+            return reservationSlots.Where(x => (x.To - x.From).TotalMinutes >= 15).ToList();
         }
     }
 }
