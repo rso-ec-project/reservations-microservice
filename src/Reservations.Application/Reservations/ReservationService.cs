@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Reservations.Application.ChargingStationsMicroService.Chargers;
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Reservations.Application.Reservations
 {
@@ -29,7 +29,20 @@ namespace Reservations.Application.Reservations
             if (userId != null)
                 reservations = reservations.Where(x => x.UserId == userId).ToList();
 
-            return _mapper.Map<List<Reservation>, List<ReservationDto>>(reservations);
+            var reservationDtos = _mapper.Map<List<Reservation>, List<ReservationDto>>(reservations);
+            foreach (var reservation in reservationDtos)
+            {
+                var (charger, httpStatusCode) = await _chargerService.GetAsync(reservation.ChargerId);
+
+                reservation.Charger = httpStatusCode switch
+                {
+                    HttpStatusCode.NotFound => new ChargerDto(),
+                    HttpStatusCode.OK => charger,
+                    _ => null
+                };
+            }
+
+            return reservationDtos;
         }
 
         public async Task<ReservationDto> GetAsync(int reservationId)

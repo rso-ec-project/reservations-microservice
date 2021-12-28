@@ -7,5 +7,7 @@
         public double ChargingFeePerKwh { get; set; }
         public string ModelName { get; set; }
         public string Manufacturer { get; set; }
+        public string ChargingStationName { get; set; }
+        public string Address { get; set; }
     }
 }
