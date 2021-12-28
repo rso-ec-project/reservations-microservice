@@ -2,6 +2,7 @@
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Reservations.Application.Reservations
@@ -17,9 +18,13 @@ namespace Reservations.Application.Reservations
             _mapper = mapper;
         }
 
-        public async Task<List<ReservationDto>> GetAsync()
+        public async Task<List<ReservationDto>> GetAsync(int? userId)
         {
             var reservations = await _unitOfWork.ReservationRepository.GetAsync();
+
+            if (userId != null)
+                reservations = reservations.Where(x => x.UserId == userId).ToList();
+
             return _mapper.Map<List<Reservation>, List<ReservationDto>>(reservations);
         }
 

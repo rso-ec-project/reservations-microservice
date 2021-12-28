@@ -23,9 +23,9 @@ namespace Reservations.API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<List<ReservationDto>>> Get()
+        public async Task<ActionResult<List<ReservationDto>>> Get([FromQuery] int? userId = null)
         {
-            return await _reservationService.GetAsync();
+            return await _reservationService.GetAsync(userId);
         }
 
         [HttpGet("{id}")]
