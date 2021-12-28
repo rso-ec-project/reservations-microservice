@@ -47,7 +47,12 @@ namespace Reservations.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ReservationDto>> Post([FromBody] ReservationPostDto reservationPostDto)
         {
-            return await _reservationService.PostAsync(reservationPostDto);
+            var reservation = await _reservationService.PostAsync(reservationPostDto);
+
+            if (reservation == null)
+                return Conflict("Posted reservation is overlapping with an existing reservation.");
+
+            return reservation;
         }
 
         [HttpPut("{id}")]

@@ -36,6 +36,15 @@ namespace Reservations.Application.Reservations
 
         public async Task<ReservationDto> PostAsync(ReservationPostDto reservationPostDto)
         {
+            var reservations = await _unitOfWork.ReservationRepository.GetAsync();
+            reservations = reservations.Where(x => x.ChargerId == reservationPostDto.ChargerId).ToList();
+
+            var overlappingReservations =
+                reservations.Where(x => x.To > reservationPostDto.From && x.From < reservationPostDto.To);
+
+            if (overlappingReservations.Any())
+                return null;
+
             var reservation = _mapper.Map<ReservationPostDto, Reservation>(reservationPostDto);
             var addedReservation = await _unitOfWork.ReservationRepository.AddAsync(reservation);
             await _unitOfWork.CommitAsync();
