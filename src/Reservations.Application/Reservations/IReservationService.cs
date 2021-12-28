@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Reservations.Application.Reservations
@@ -7,7 +8,7 @@ namespace Reservations.Application.Reservations
     {
         Task<List<ReservationDto>> GetAsync(int? userId);
         Task<ReservationDto> GetAsync(int reservationId);
-        Task<ReservationDto> PostAsync(ReservationPostDto reservationPostDto);
+        Task<(ReservationDto, HttpStatusCode)> PostAsync(ReservationPostDto reservationPostDto);
         Task<ReservationDto> PutAsync(int reservationId, ReservationPutDto reservationPutDto);
         Task<bool> DeleteAsync(int reservationId);
     }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Reservations.Application.Reservations;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Reservations.API.Controllers
@@ -47,12 +48,14 @@ namespace Reservations.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ReservationDto>> Post([FromBody] ReservationPostDto reservationPostDto)
         {
-            var reservation = await _reservationService.PostAsync(reservationPostDto);
+            var (reservation, httpStatusCode) = await _reservationService.PostAsync(reservationPostDto);
 
-            if (reservation == null)
-                return Conflict("Posted reservation is overlapping with an existing reservation.");
-
-            return reservation;
+            return httpStatusCode switch
+            {
+                HttpStatusCode.Conflict => Conflict("Posted reservation is overlapping with an existing reservation."),
+                HttpStatusCode.NotFound => NotFound($"Charger with Id {reservationPostDto.ChargerId} not found."),
+                _ => reservation
+            };
         }
 
         [HttpPut("{id}")]

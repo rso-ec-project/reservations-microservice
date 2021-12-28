@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using AutoMapper;
+using Reservations.Application.ChargingStationsMicroService.Chargers;
 using Reservations.Domain.ReservationAggregate;
 using Reservations.Domain.Shared;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reservations.Application.Reservations
 {
@@ -11,11 +13,13 @@ namespace Reservations.Application.Reservations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IChargerService _chargerService;
 
-        public ReservationService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ReservationService(IUnitOfWork unitOfWork, IMapper mapper, IChargerService chargerService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _chargerService = chargerService;
         }
 
         public async Task<List<ReservationDto>> GetAsync(int? userId)
@@ -34,7 +38,7 @@ namespace Reservations.Application.Reservations
             return _mapper.Map<Reservation, ReservationDto>(reservation);
         }
 
-        public async Task<ReservationDto> PostAsync(ReservationPostDto reservationPostDto)
+        public async Task<(ReservationDto, HttpStatusCode)> PostAsync(ReservationPostDto reservationPostDto)
         {
             var reservations = await _unitOfWork.ReservationRepository.GetAsync();
             reservations = reservations.Where(x => x.ChargerId == reservationPostDto.ChargerId).ToList();
@@ -43,12 +47,27 @@ namespace Reservations.Application.Reservations
                 reservations.Where(x => x.To > reservationPostDto.From && x.From < reservationPostDto.To);
 
             if (overlappingReservations.Any())
-                return null;
+                return (null, HttpStatusCode.Conflict);
 
             var reservation = _mapper.Map<ReservationPostDto, Reservation>(reservationPostDto);
+
+            var (chargerDto, httpStatusCode) = await _chargerService.GetAsync(reservationPostDto.ChargerId);
+
+            switch (httpStatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    return (null, HttpStatusCode.NotFound);
+                case HttpStatusCode.OK when chargerDto.Id == reservationPostDto.ChargerId:
+                    reservation.StatusId = 1;
+                    break;
+                default:
+                    reservation.StatusId = 2;
+                    break;
+            }
+
             var addedReservation = await _unitOfWork.ReservationRepository.AddAsync(reservation);
             await _unitOfWork.CommitAsync();
-            return _mapper.Map<Reservation, ReservationDto>(addedReservation);
+            return (_mapper.Map<Reservation, ReservationDto>(addedReservation), HttpStatusCode.Created);
         }
 
         public async Task<ReservationDto> PutAsync(int reservationId, ReservationPutDto reservationPutDto)
