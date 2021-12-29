@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservations-ms-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reservations-ms
+  template:
+    metadata:
+      labels:
+        app: reservations-ms
+    spec:
+      containers:
+        - image: anzx10/reservations-microservice:v2.0
+          name: reservations-ms
+          env:
+            - name: DB_HOST
+              value: tyke.db.elephantsql.com
+            - name: DB_NAME
+              value: cennzmkv
+            - name: DB_USERNAME
+              value: cennzmkv
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: reservations-ms
+                  key: db-password
+          ports:
+            - containerPort: 80
+              name: server
+              protocol: TCP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: reservations-ms
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: server
+  selector:
+    app: reservations-ms
