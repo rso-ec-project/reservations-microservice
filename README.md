@@ -23,7 +23,7 @@ Open Package Manager Console and execute these commands to create the database a
 
 When running locally with Docker, move Dockerfile to the Reservations.API project and add Environment Variables in one line as follows:
 
-    ENV DB_HOST={Host} DB_NAME={Database} DB_USERNAME={Username} DB_PASSWORD={Password}
+    ENV DB_HOST={Host} DB_NAME={Database} DB_USERNAME={Username} DB_PASSWORD={Password} HOST_IP=host.docker.internal
 
 
 # Details
@@ -44,7 +44,7 @@ This service is using a PostgreSQL Database, hosted on ElephantSQL. It consists 
 
 ## Configuration
 
-This microservice is configured using Environment Variables. Currently, only configuration for the database is required. The password is safely stored in Kubernetes Secrets, while other information is provided during the deployment process on the Cluster.
+This microservice is configured using Environment Variables. Currently, only configuration for the database is required. The HOST_IP variable is used to find the Consul server either locally or in a cluster. The password is safely stored in Kubernetes Secrets, while other information is provided during the deployment process on the Cluster.
 
 ## Endpoints
 
@@ -53,5 +53,8 @@ This microservice is configured using Environment Variables. Currently, only con
 - POST /Reservations
 - PUT /Reservations/{id}
 - DELETE /Reservations/{id}
+- GET /ReservationSlots
+- GET /Statuses
+- GET /Status/{id}
 
 All endpoints are described with the OpenAPI 3 standard on the **/swagger/index.html** endpoint of the service. The API is also versioned, which adds a version segment to the path of the endpoints (e.g. api/**v1**/Reservations).
