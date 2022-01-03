@@ -27,10 +27,12 @@ spec:
                 secretKeyRef:
                   name: reservations-ms
                   key: db-password
+
           ports:
             - containerPort: 80
               name: server
               protocol: TCP
+          imagePullPolicy: Always
 ---
 
 apiVersion: v1
@@ -40,7 +42,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 80
+    - port: 8083
       protocol: TCP
       targetPort: server
   selector:

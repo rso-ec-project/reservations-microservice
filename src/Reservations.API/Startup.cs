@@ -18,6 +18,9 @@ using Reservations.Infrastructure;
 using Reservations.Infrastructure.Repositories;
 using System;
 using System.Net.Http;
+using Steeltoe.Common.Http.Discovery;
+using Steeltoe.Discovery.Client;
+using Steeltoe.Discovery.Consul;
 
 namespace Reservations.API
 {
@@ -53,9 +56,16 @@ namespace Reservations.API
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IStatusRepository, StatusRepository>();
 
-            services.AddHttpClient<ChargingStationsMicroServiceClient>((_, client) =>
+            Configuration["Consul:Host"] = Environment.GetEnvironmentVariable("HOST_IP");
+            services.AddServiceDiscovery(options => options.UseConsul());
+
+            // ChargingStations MS Client
+
+            services.AddTransient<ChargingStationsMicroServiceClient>();
+
+            services.AddHttpClient("chargers-dev", (_, client) =>
                 {
-                    SetHttpClientBaseAddress(client, new Uri(Configuration["ApplicationSettings:ChargingStationsMSAddress"]));
+                    SetHttpClientBaseAddress(client, new Uri(FormatConfigString(Configuration["ChargingStationsService:DevAddress"])));
                     SetHttpClientRequestHeader(client, "ReservationsMS");
                 })
                 .ConfigurePrimaryHttpMessageHandler(() =>
@@ -65,6 +75,19 @@ namespace Reservations.API
                             HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                     }
                 );
+
+            services.AddHttpClient("chargers", (_, client) =>
+                {
+                    SetHttpClientBaseAddress(client, new Uri(FormatConfigString(Configuration["ChargingStationsService:Address"])));
+                    SetHttpClientRequestHeader(client, "ReservationsMS");
+                })
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                    new HttpClientHandler()
+                    {
+                        ServerCertificateCustomValidationCallback =
+                            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                    }
+                ).AddServiceDiscovery();
 
             services.AddControllers()
                 .AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = null; });
@@ -77,6 +100,11 @@ namespace Reservations.API
                 config.AssumeDefaultVersionWhenUnspecified = true;
                 config.ReportApiVersions = true;
             });
+        }
+
+        private static string FormatConfigString(string connectionString)
+        {
+            return connectionString.Replace("\"", "");
         }
 
         private static void SetHttpClientRequestHeader(HttpClient client, string userAgent)
