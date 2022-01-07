@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System;
 using Winton.Extensions.Configuration.Consul;
 using Winton.Extensions.Configuration.Consul.Parsers;
@@ -42,6 +43,7 @@ namespace Reservations.API
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                })
+                .UseSerilog((ctx, config) => { config.ReadFrom.Configuration(ctx.Configuration); });
     }
 }
