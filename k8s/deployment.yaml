@@ -13,7 +13,7 @@ spec:
         app: reservations-ms
     spec:
       containers:
-        - image: anzx10/reservations-microservice:v2.0
+        - image: anzx10/reservations-microservice:v3.0
           name: reservations-ms
           env:
             - name: DB_HOST
