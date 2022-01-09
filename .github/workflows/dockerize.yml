@@ -28,4 +28,4 @@ jobs:
       with:
         file: ./src/Dockerfile
         push: true
-        tags: anzx10/reservations-microservice:v3.0
+        tags: anzx10/reservations-microservice:v4.0

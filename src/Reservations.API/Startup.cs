@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Polly;
 using Reservations.API.Extensions;
 using Reservations.Application.ChargingStationsMicroService.Chargers;
 using Reservations.Application.Reservations;
@@ -16,22 +18,24 @@ using Reservations.Domain.Shared;
 using Reservations.Domain.StatusAggregate;
 using Reservations.Infrastructure;
 using Reservations.Infrastructure.Repositories;
-using System;
-using System.Net.Http;
 using Steeltoe.Common.Http.Discovery;
 using Steeltoe.Discovery.Client;
 using Steeltoe.Discovery.Consul;
+using System;
+using System.Net.Http;
 
 namespace Reservations.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
             Configuration = configuration;
+            _logger = logger;
         }
 
         public IConfiguration Configuration { get; }
+        private readonly ILogger<Startup> _logger;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -68,6 +72,10 @@ namespace Reservations.API
                     SetHttpClientBaseAddress(client, new Uri(FormatConfigString(Configuration["ChargingStationsService:DevAddress"])));
                     SetHttpClientRequestHeader(client, "ReservationsMS");
                 })
+                .AddTransientHttpErrorPolicy(p => 
+                    p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(500)))
+                .AddTransientHttpErrorPolicy(p => 
+                    p.CircuitBreakerAsync(5, TimeSpan.FromMilliseconds(3500)))
                 .ConfigurePrimaryHttpMessageHandler(() =>
                     new HttpClientHandler()
                     {
@@ -81,6 +89,10 @@ namespace Reservations.API
                     SetHttpClientBaseAddress(client, new Uri(FormatConfigString(Configuration["ChargingStationsService:Address"])));
                     SetHttpClientRequestHeader(client, "ReservationsMS");
                 })
+                .AddTransientHttpErrorPolicy(p =>
+                    p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(500)))
+                .AddTransientHttpErrorPolicy(p =>
+                    p.CircuitBreakerAsync(5, TimeSpan.FromMilliseconds(3500)))
                 .ConfigurePrimaryHttpMessageHandler(() =>
                     new HttpClientHandler()
                     {
@@ -144,7 +156,7 @@ namespace Reservations.API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ChargingStations.API v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reservations.API v1"));
 
             app.UseHttpsRedirection();
 
