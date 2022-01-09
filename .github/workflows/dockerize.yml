@@ -13,14 +13,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    
-    - name: Get Time
-      id: time
-      uses: nanzm/get-time-action@v1.0
-      with:
-        timezone: 1
-        format: 'YYYY-MM-DD-HH-mm-ss'
-        
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
@@ -36,4 +28,4 @@ jobs:
       with:
         file: ./src/Dockerfile
         push: true
-        tags: anzx10/reservations-microservice:${{steps.time.outputs.time}}
+        tags: anzx10/reservations-microservice:v4.0
