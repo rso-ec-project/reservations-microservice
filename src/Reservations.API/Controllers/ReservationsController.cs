@@ -21,6 +21,11 @@ namespace Reservations.API.Controllers
             _reservationService = reservationService;
         }
 
+        /// <summary>
+        /// Get a list of user reservations.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -29,6 +34,11 @@ namespace Reservations.API.Controllers
             return await _reservationService.GetAsync(userId);
         }
 
+        /// <summary>
+        /// Get a single reservation by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -43,6 +53,11 @@ namespace Reservations.API.Controllers
             return reservation;
         }
 
+        /// <summary>
+        /// Create a reservation.
+        /// </summary>
+        /// <param name="reservationPostDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,6 +73,12 @@ namespace Reservations.API.Controllers
             };
         }
 
+        /// <summary>
+        /// Update a reservation.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reservationPutDto"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -71,6 +92,11 @@ namespace Reservations.API.Controllers
             return reservation;
         }
 
+        /// <summary>
+        /// Delete a reservation.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

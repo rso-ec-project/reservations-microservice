@@ -22,6 +22,13 @@ namespace Reservations.API.Controllers
             _reservationSlotService = reservationSlotService;
         }
 
+        /// <summary>
+        /// Get available reservation slots of a charger between two dates.
+        /// </summary>
+        /// <param name="chargerId"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -3,7 +3,9 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Reservations.API.Extensions
 {
@@ -18,11 +20,15 @@ namespace Reservations.API.Extensions
 
             services.AddSwaggerGen(config =>
             {
-                config.SwaggerDoc("v1", new OpenApiInfo { Title = "ChargingStations.API", Version = "v1" });
+                config.SwaggerDoc("v1", new OpenApiInfo { Title = "Reservations.API", Version = "v1" });
 
                 config.DocumentFilter<ResolvePathVersionFilter>();
                 config.OperationFilter<RemovePathVersionFilter>();
                 config.OperationFilter<ContentTypeFilter>();
+
+                // using System.Reflection;
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                config.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
 
             return services;

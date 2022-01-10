@@ -20,6 +20,10 @@ namespace Reservations.API.Controllers
             _statusService = statusService;
         }
 
+        /// <summary>
+        /// Get a list of all statuses.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -28,6 +32,11 @@ namespace Reservations.API.Controllers
             return await _statusService.GetAsync();
         }
 
+        /// <summary>
+        /// Get a single status by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
